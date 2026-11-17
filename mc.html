@@ -183,6 +183,23 @@
       border-color: #f59e0b;
       box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35);
     }
+    .card.introduced {
+      background: #f3f4f6;
+      border-color: #d1d5db;
+      opacity: 0.52;
+      box-shadow: none;
+    }
+    .card.introduced .name,
+    .card.introduced .title {
+      color: #6b7280;
+    }
+    .card.introduced .order-tag {
+      background: #e5e7eb;
+      color: #4b5563;
+    }
+    .card.introduced .time-tag {
+      color: #6b7280;
+    }
     .card-top {
       display: flex;
       justify-content: space-between;
@@ -206,14 +223,15 @@
       font-size: 1.65rem;
       font-weight: 900;
       color: #111827;
-      line-height: 1.25;
+      line-height: 1.2;
       margin-top: 4px;
     }
     .title {
-      font-size: 1.12rem;
-      color: #374151;
-      font-weight: 700;
-      line-height: 1.35;
+      font-size: 1.38rem;
+      color: #1f2937;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-top: 2px;
     }
     .note {
       margin-top: 6px;
@@ -233,14 +251,31 @@
       justify-content: space-between;
       align-items: center;
       gap: 6px;
-      margin-top: 4px;
-      padding-top: 6px;
+      margin-top: 6px;
+      padding-top: 8px;
       border-top: 1px dashed #e5e7eb;
     }
-    .drag-hint {
-      font-size: 0.74rem;
-      color: #9ca3af;
-      font-weight: 600;
+    .btn-intro {
+      border: 1.5px solid #16a34a;
+      background: #dcfce7;
+      color: #166534;
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-intro:hover {
+      background: #bbf7d0;
+    }
+    .btn-intro.done {
+      border-color: #9ca3af;
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .btn-intro.done:hover {
+      background: #d1d5db;
     }
     .sort-btns {
       display: flex;
@@ -300,6 +335,7 @@
     <div class="summary">
       <span id="countText">已報到貴賓：0 位</span>
       <div class="summary-right">
+        <button id="btnResetIntro" type="button" class="btn-reset-order">↺ 清除已介紹標記</button>
         <button id="btnResetOrder" type="button" class="btn-reset-order">↺ 還原原名單順序</button>
         <span id="timeText"></span>
       </div>
@@ -311,16 +347,40 @@
   <script>
     (function () {
       const ORDER_STORAGE_KEY = 'tp72_mc_custom_order';
+      const INTRO_STORAGE_KEY = 'tp72_mc_introduced_ids';
       const checkedContainer = document.getElementById('checkedContainer');
       const countText = document.getElementById('countText');
       const timeText = document.getElementById('timeText');
       const syncInfo = document.getElementById('syncInfo');
       const btnViewMode = document.getElementById('btnViewMode');
       const btnResetOrder = document.getElementById('btnResetOrder');
+      const btnResetIntro = document.getElementById('btnResetIntro');
 
       let groupByCategory = false;
       let latestData = { guests: [], categories: [] };
       let dragSourceId = null;
+
+      function loadIntroducedSet() {
+        try {
+          const raw = localStorage.getItem(INTRO_STORAGE_KEY);
+          const arr = JSON.parse(raw || '[]');
+          return new Set(Array.isArray(arr) ? arr : []);
+        } catch (e) {
+          return new Set();
+        }
+      }
+
+      function saveIntroducedSet(setObj) {
+        localStorage.setItem(INTRO_STORAGE_KEY, JSON.stringify([...setObj]));
+      }
+
+      function toggleIntroduced(id) {
+        const setObj = loadIntroducedSet();
+        if (setObj.has(id)) setObj.delete(id);
+        else setObj.add(id);
+        saveIntroducedSet(setObj);
+        render();
+      }
 
       function loadCustomOrder() {
         try {
@@ -398,6 +458,11 @@
         render();
       });
 
+      btnResetIntro.addEventListener('click', () => {
+        localStorage.removeItem(INTRO_STORAGE_KEY);
+        render();
+      });
+
       function esc(s) {
         return String(s || '')
           .replace(/&/g, '&amp;')
@@ -406,10 +471,11 @@
           .replace(/"/g, '&quot;');
       }
 
-      function renderCard(g, displayNum, totalLen) {
+      function renderCard(g, displayNum, totalLen, introSet) {
         const cleanNote = (g.note === '可填代理' || g.note === '可填助理') ? '' : g.note;
+        const isDone = introSet.has(g.id);
         return `
-          <article class="card" draggable="true" data-id="${esc(g.id)}">
+          <article class="card ${isDone ? 'introduced' : ''}" draggable="true" data-id="${esc(g.id)}">
             <div>
               <div class="card-top">
                 <span class="order-tag">#${displayNum} ${esc(g.category)}</span>
@@ -420,7 +486,9 @@
               ${cleanNote ? `<div class="note">📝 ${esc(cleanNote)}</div>` : ''}
             </div>
             <div class="card-sort-bar">
-              <span class="drag-hint">⋮⋮ 可拖曳調序</span>
+              <button type="button" class="btn-intro ${isDone ? 'done' : ''}" data-intro="${esc(g.id)}">
+                ${isDone ? '↩ 已介紹（點此復原）' : '✓ 介紹完畢'}
+              </button>
               <div class="sort-btns">
                 <button type="button" class="btn-move" data-move="-1" data-id="${esc(g.id)}" ${displayNum === 1 ? 'disabled' : ''} title="往前移一位">◀</button>
                 <button type="button" class="btn-move" data-move="1" data-id="${esc(g.id)}" ${displayNum === totalLen ? 'disabled' : ''} title="往後移一位">▶</button>
@@ -432,7 +500,9 @@
 
       function render() {
         const ordered = getOrderedCheckedGuests();
-        countText.textContent = `已報到貴賓：${ordered.length} / ${latestData.guests.length} 位`;
+        const introSet = loadIntroducedSet();
+        const introCount = ordered.filter((g) => introSet.has(g.id)).length;
+        countText.textContent = `已報到貴賓：${ordered.length} / ${latestData.guests.length} 位（已介紹：${introCount} 位）`;
 
         if (ordered.length === 0) {
           checkedContainer.innerHTML = `<div class="empty">目前尚無已簽到貴賓</div>`;
@@ -444,7 +514,7 @@
         ordered.forEach((g, idx) => orderMap.set(g.id, idx + 1));
 
         if (!groupByCategory) {
-          checkedContainer.innerHTML = `<div class="list">${ordered.map((g, idx) => renderCard(g, idx + 1, totalLen)).join('')}</div>`;
+          checkedContainer.innerHTML = `<div class="list">${ordered.map((g, idx) => renderCard(g, idx + 1, totalLen, introSet)).join('')}</div>`;
           return;
         }
 
@@ -464,13 +534,18 @@
                 <span>${esc(cat)}</span>
                 <span>${list.length} 位</span>
               </div>
-              <div class="list">${list.map((g) => renderCard(g, orderMap.get(g.id), totalLen)).join('')}</div>
+              <div class="list">${list.map((g) => renderCard(g, orderMap.get(g.id), totalLen, introSet)).join('')}</div>
             </div>
           `).join('');
       }
 
-      // 點擊 ◀ / ▶ 調整順序
+      // 點擊「介紹完畢」或 ◀ / ▶ 調整順序
       checkedContainer.addEventListener('click', (e) => {
+        const introBtn = e.target.closest('button[data-intro]');
+        if (introBtn) {
+          toggleIntroduced(introBtn.dataset.intro);
+          return;
+        }
         const btn = e.target.closest('button[data-move]');
         if (!btn) return;
         moveGuest(btn.dataset.id, Number(btn.dataset.move));

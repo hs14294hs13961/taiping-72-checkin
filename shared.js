@@ -12,6 +12,7 @@ window.TP72Checkin = (function () {
     '里長與鄰長',
     '社區與地方社團',
     '企業與榮譽貴賓',
+    '學校單位',
     '現場臨時來賓'
   ];
 
@@ -118,7 +119,15 @@ window.TP72Checkin = (function () {
     const res = await fetch(url, { method: 'GET' });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || '讀取雲端資料失敗');
-    return { ok: true, mode: 'cloud', guests: json.guests || [], categories: json.categories || DEFAULT_CATEGORIES };
+    const cats = Array.isArray(json.categories) && json.categories.length > 0
+      ? [...json.categories]
+      : [...DEFAULT_CATEGORIES];
+    if (!cats.includes('學校單位')) {
+      const idx = cats.indexOf('現場臨時來賓');
+      if (idx !== -1) cats.splice(idx, 0, '學校單位');
+      else cats.push('學校單位');
+    }
+    return { ok: true, mode: 'cloud', guests: json.guests || [], categories: cats };
   }
 
   async function postAction(payload) {
