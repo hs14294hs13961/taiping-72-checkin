@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>太平國小 72 週年校慶 — 貴賓簽到系統</title>
+  <link rel="icon" type="image/png" href="./太平國小_校徽.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red-deep: #7f1d1d;
+      --red-main: #b91c1c;
+      --red-soft: #fef2f2;
+      --gold-main: #d97706;
+      --gold-light: #fef3c7;
+      --green-main: #15803d;
+      --green-soft: #dcfce7;
+      --bg-page: #fdf8f3;
+      --bg-card: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border-soft: #e5e7eb;
+      --shadow-sm: 0 2px 8px rgba(127, 29, 29, 0.06);
+      --shadow-md: 0 8px 24px rgba(127, 29, 29, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    /* 頂部校徽橫幅 */
+    .topbar {
+      background: linear-gradient(135deg, #7f1d1d 0%, #b91c1c 60%, #991b1b 100%);
+      color: #fff;
+      padding: 16px 20px;
+      box-shadow: 0 4px 16px rgba(127, 29, 29, 0.25);
+      border-bottom: 4px solid #f59e0b;
+    }
+
+    .topbar-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      background: #fff;
+      border-radius: 50%;
+      padding: 4px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-text p {
+      margin: 2px 0 0;
+      font-size: 0.9rem;
+      color: #fde68a;
+      font-weight: 500;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mode-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      color: #fff;
+    }
+
+    .btn-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .btn-header:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-header.gold {
+      background: #f59e0b;
+      border-color: #fbbf24;
+      color: #451a03;
+    }
+
+    .btn-header.gold:hover {
+      background: #fbbf24;
+    }
+
+    /* 主容器 */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 16px 16px 48px;
+    }
+
+    /* 統計儀表板 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid #f3e8dd;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .stat-card.total .stat-value { color: var(--red-deep); }
+    .stat-card.checked .stat-value { color: var(--green-main); }
+    .stat-card.pending .stat-value { color: var(--gold-main); }
+    .stat-card.rate .stat-value { color: var(--red-main); }
+
+    /* 控制列：搜尋 + 狀態篩選 + 新增按鈕 */
+    .controls-bar {
+      background: var(--bg-card);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid #f3e8dd;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 220px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 11px 38px 11px 14px;
+      border-radius: 10px;
+      border: 2px solid #e5e7eb;
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--red-main);
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: #e5e7eb;
+      color: #374151;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      font-weight: 700;
+    }
+
+    .status-pills {
+      display: flex;
+      gap: 6px;
+      background: #f3f4f6;
+      padding: 4px;
+      border-radius: 10px;
+    }
+
+    .status-pill {
+      border: none;
+      background: transparent;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .status-pill.active {
+      background: #fff;
+      color: var(--red-main);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .btn-add {
+      padding: 11px 18px;
+      border-radius: 10px;
+      border: none;
+      background: var(--red-main);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+
+    .btn-add:hover {
+      background: var(--red-deep);
+    }
+
+    /* 分類頁籤 */
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+      scrollbar-width: thin;
+    }
+
+    .cat-tab {
+      border: 1px solid #e5d5c5;
+      background: #fff;
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .cat-tab:hover {
+      border-color: var(--red-main);
+    }
+
+    .cat-tab.active {
+      background: var(--red-main);
+      color: #fff;
+      border-color: var(--red-main);
+    }
+
+    .cat-count {
+      font-size: 0.78rem;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .cat-tab.active .cat-count {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* 貴賓卡片網格：桌機一排 4~5 個，字體清晰不擁擠 */
+    .guest-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    @media (max-width: 1279px) {
+      .guest-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    @media (max-width: 1023px) {
+      .guest-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 719px) {
+      .guest-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    .guest-card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: var(--shadow-sm);
+      border: 2px solid #f3e8dd;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      transition: transform 0.12s, border-color 0.15s;
+    }
+
+    .guest-card.checked {
+      border-color: #86efac;
+      background: #f0fdf4;
+    }
+
+    .guest-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .guest-cat {
+      display: inline-block;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--gold-light);
+      color: #92400e;
+      margin-bottom: 4px;
+    }
+
+    .guest-name {
+      margin: 0;
+      font-size: 1.22rem;
+      font-weight: 900;
+      color: #111827;
+      line-height: 1.25;
+    }
+
+    .guest-title {
+      margin: 3px 0 0;
+      font-size: 0.9rem;
+      color: #374151;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .status-badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .status-badge.pending {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .status-badge.done {
+      background: var(--green-soft);
+      color: var(--green-main);
+    }
+
+    .guest-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      min-height: 20px;
+    }
+
+    .note-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #fef3c7;
+      border: 1.5px solid #f59e0b;
+      padding: 3px 10px;
+      border-radius: 7px;
+      font-size: 0.98rem;
+      color: #78350f;
+      font-weight: 900;
+      line-height: 1.3;
+    }
+
+    .guest-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-checkin {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.92rem;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .btn-checkin.do-in {
+      background: var(--red-main);
+      color: #fff;
+    }
+
+    .btn-checkin.do-in:hover {
+      background: var(--red-deep);
+    }
+
+    .btn-checkin.do-out {
+      background: #fff;
+      color: #4b5563;
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-checkin.do-out:hover {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #fca5a5;
+    }
+
+    .btn-note {
+      padding: 8px 9px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: #374151;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .btn-note:hover {
+      background: #f9fafb;
+      border-color: #9ca3af;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 48px 16px;
+      background: #fff;
+      border-radius: 14px;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 460px;
+      padding: 22px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal h2 {
+      margin: 0 0 14px;
+      font-size: 1.2rem;
+      color: var(--red-deep);
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+      color: #374151;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    .quick-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .chip-btn {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .chip-btn:hover {
+      background: var(--gold-light);
+      border-color: var(--gold-main);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .btn-secondary {
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: none;
+      background: var(--red-main);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #111827;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 720px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .brand-logo {
+        width: 50px;
+        height: 50px;
+      }
+      .brand-text h1 {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img src="./太平國小_校徽.png" alt="太平國小校徽" class="brand-logo" />
+        <div class="brand-text">
+          <h1>新竹縣關西鎮太平國民小學 72 週年校慶</h1>
+          <p>貴賓報到暨即時簽到系統（接待桌作業端）</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span id="modeBadge" class="mode-badge">🟡 本機展示模式</span>
+        <a href="./mc.html" target="_blank" class="btn-header gold">🎤 司儀即時看板</a>
+        <button id="btnRefresh" class="btn-header" type="button">🔄 立即同步</button>
+        <button id="btnSettings" class="btn-header" type="button">⚙️ 連線設定</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- 統計儀表板 -->
+    <section class="stats-grid">
+      <div class="stat-card total">
+        <span class="stat-label">應邀貴賓總數</span>
+        <span class="stat-value" id="statTotal">0</span>
+      </div>
+      <div class="stat-card checked">
+        <span class="stat-label">已簽到貴賓</span>
+        <span class="stat-value" id="statChecked">0</span>
+      </div>
+      <div class="stat-card pending">
+        <span class="stat-label">尚未報到</span>
+        <span class="stat-value" id="statPending">0</span>
+      </div>
+      <div class="stat-card rate">
+        <span class="stat-label">報到率</span>
+        <span class="stat-value" id="statRate">0%</span>
+      </div>
+    </section>
+
+    <!-- 搜尋與操作列 -->
+    <section class="controls-bar">
+      <div class="search-box">
+        <input id="searchInput" type="text" placeholder="搜尋姓名、職稱、單位或鄰別（例：陳光彩、鄰長、議員）..." />
+        <button id="searchClear" class="search-clear" type="button">×</button>
+      </div>
+      <div class="status-pills">
+        <button class="status-pill active" data-status="all" type="button">全部</button>
+        <button class="status-pill" data-status="pending" type="button">未簽到</button>
+        <button class="status-pill" data-status="checked" type="button">已簽到</button>
+      </div>
+      <button id="btnOpenAdd" class="btn-add" type="button">＋ 新增現場貴賓</button>
+    </section>
+
+    <!-- 分類頁籤 -->
+    <nav id="categoryTabs" class="category-tabs"></nav>
+
+    <!-- 貴賓卡片區 -->
+    <section id="guestGrid" class="guest-grid"></section>
+  </main>
+
+  <!-- 代理 / 備註 Modal -->
+  <div id="noteModal" class="modal-backdrop">
+    <div class="modal">
+      <h2 id="noteModalTitle">出席身分／代理備註</h2>
+      <div class="form-group">
+        <label for="noteInput">備註內容（可填寫代理人或助理姓名）</label>
+        <input id="noteInput" type="text" placeholder="例如：本人出席、王小明 代理、李助理代表" />
+        <div class="quick-chips">
+          <button type="button" class="chip-btn" data-chip="本人出席">本人出席</button>
+          <button type="button" class="chip-btn" data-chip="助理代表出席">助理代表出席</button>
+          <button type="button" class="chip-btn" data-chip="代理出席">代理出席</button>
+          <button type="button" class="chip-btn" data-chip="">清除備註</button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="btnNoteCancel">取消</button>
+        <button type="button" class="btn-primary" id="btnNoteSaveAndCheckin">儲存並完成簽到</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新增現場貴賓 Modal -->
+  <div id="addModal" class="modal-backdrop">
+    <div class="modal">
+      <h2>＋ 新增現場貴賓</h2>
+      <div class="form-group">
+        <label for="addName">貴賓姓名 *</label>
+        <input id="addName" type="text" placeholder="請輸入姓名或單位名稱" />
+      </div>
+      <div class="form-group">
+        <label for="addTitle">單位／職稱</label>
+        <input id="addTitle" type="text" placeholder="例如：關西國小校長、家長會顧問" />
+      </div>
+      <div class="form-group">
+        <label for="addCategory">分類</label>
+        <select id="addCategory"></select>
+      </div>
+      <div class="form-group">
+        <label for="addNote">出席備註</label>
+        <input id="addNote" type="text" placeholder="例如：本人出席（選填）" />
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input id="addAutoCheckin" type="checkbox" checked style="width:auto;" />
+          新增後立即完成簽到
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="btnAddCancel">取消</button>
+        <button type="button" class="btn-primary" id="btnAddSubmit">新增貴賓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAS 連線設定 & 後台管理 Modal -->
+  <div id="settingsModal" class="modal-backdrop">
+    <div class="modal">
+      <h2>⚙️ 連線設定與資料管理</h2>
+      <div class="form-group">
+        <label for="gasUrlInput">GAS 網頁應用程式網址（結尾為 /exec）</label>
+        <input id="gasUrlInput" type="url" placeholder="https://script.google.com/macros/s/.../exec" />
+      </div>
+      <p style="font-size:0.84rem;color:#6b7280;margin:0 0 14px;">
+        留空將使用「本機展示模式」；貼上 GAS 網址後即啟用多台設備即時雲端同步。
+      </p>
+      <div style="border-top:1px solid #e5e7eb;padding-top:12px;margin-bottom:12px;">
+        <label style="display:block;font-size:0.86rem;font-weight:700;color:#991b1b;margin-bottom:8px;">活動前／彩排後資料管理</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn-secondary" id="btnResetAllStatus" style="color:#b45309;border-color:#fcd34d;background:#fffbeb;">🔄 重置所有簽到狀態</button>
+          <button type="button" class="btn-secondary" id="btnResetDemo">還原本機 41 筆測試名單</button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="btnSettingsCancel">關閉</button>
+        <button type="button" class="btn-primary" id="btnSettingsSave">儲存並連線</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="./shared.js"></script>
+  <script>
+    (function () {
+      let state = {
+        guests: [],
+        categories: [],
+        activeCategory: '全部',
+        statusFilter: 'all',
+        search: '',
+        mode: 'local',
+        editingNoteId: null
+      };
+
+      const el = {
+        modeBadge: document.getElementById('modeBadge'),
+        statTotal: document.getElementById('statTotal'),
+        statChecked: document.getElementById('statChecked'),
+        statPending: document.getElementById('statPending'),
+        statRate: document.getElementById('statRate'),
+        searchInput: document.getElementById('searchInput'),
+        searchClear: document.getElementById('searchClear'),
+        categoryTabs: document.getElementById('categoryTabs'),
+        guestGrid: document.getElementById('guestGrid'),
+        toast: document.getElementById('toast'),
+        noteModal: document.getElementById('noteModal'),
+        noteModalTitle: document.getElementById('noteModalTitle'),
+        noteInput: document.getElementById('noteInput'),
+        addModal: document.getElementById('addModal'),
+        addName: document.getElementById('addName'),
+        addTitle: document.getElementById('addTitle'),
+        addCategory: document.getElementById('addCategory'),
+        addNote: document.getElementById('addNote'),
+        addAutoCheckin: document.getElementById('addAutoCheckin'),
+        settingsModal: document.getElementById('settingsModal'),
+        gasUrlInput: document.getElementById('gasUrlInput')
+      };
+
+      function showToast(msg) {
+        el.toast.textContent = msg;
+        el.toast.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => el.toast.classList.remove('show'), 2400);
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      async function loadData(force = false, silent = false) {
+        try {
+          const res = await TP72Checkin.fetchGuests(force);
+          state.guests = res.guests;
+          state.categories = res.categories;
+          state.mode = res.mode;
+          renderAll();
+          if (!silent) showToast(res.mode === 'cloud' ? '已與 Google 試算表同步' : '已載入本機名單');
+        } catch (err) {
+          if (!silent) showToast('同步失敗：' + err.message);
+        }
+      }
+
+      function renderStats() {
+        const total = state.guests.length;
+        const checked = state.guests.filter((g) => g.checkedIn).length;
+        const pending = total - checked;
+        const rate = total ? Math.round((checked / total) * 100) : 0;
+
+        el.statTotal.textContent = total;
+        el.statChecked.textContent = checked;
+        el.statPending.textContent = pending;
+        el.statRate.textContent = rate + '%';
+
+        el.modeBadge.textContent = state.mode === 'cloud' ? '🟢 雲端即時同步' : '🟡 本機展示模式';
+      }
+
+      function renderCategoryTabs() {
+        const cats = ['全部', ...state.categories];
+        el.categoryTabs.innerHTML = cats.map((cat) => {
+          const list = cat === '全部' ? state.guests : state.guests.filter((g) => g.category === cat);
+          const done = list.filter((g) => g.checkedIn).length;
+          const activeClass = state.activeCategory === cat ? 'active' : '';
+          return `
+            <button type="button" class="cat-tab ${activeClass}" data-cat="${escapeHtml(cat)}">
+              <span>${escapeHtml(cat)}</span>
+              <span class="cat-count">${done}/${list.length}</span>
+            </button>
+          `;
+        }).join('');
+      }
+
+      function getFilteredGuests() {
+        const q = state.search.trim().toLowerCase();
+        return state.guests.filter((g) => {
+          if (state.activeCategory !== '全部' && g.category !== state.activeCategory) return false;
+          if (state.statusFilter === 'checked' && !g.checkedIn) return false;
+          if (state.statusFilter === 'pending' && g.checkedIn) return false;
+          if (q) {
+            const hay = `${g.name} ${g.title} ${g.category} ${g.note}`.toLowerCase();
+            if (!hay.includes(q)) return false;
+          }
+          return true;
+        });
+      }
+
+      function renderGuests() {
+        const list = getFilteredGuests();
+        if (list.length === 0) {
+          el.guestGrid.innerHTML = `<div class="empty-state">找不到符合條件的貴賓資料</div>`;
+          return;
+        }
+
+        el.guestGrid.innerHTML = list.map((g) => {
+          const cardCls = g.checkedIn ? 'guest-card checked' : 'guest-card';
+          const badge = g.checkedIn
+            ? `<span class="status-badge done">✓ 已簽到 ${escapeHtml(g.checkinTime)}</span>`
+            : `<span class="status-badge pending">未簽到</span>`;
+          const isHint = g.note === '可填代理' || g.note === '可填助理';
+          const noteHtml = g.note
+            ? (isHint
+                ? `<span style="font-size:0.78rem;color:#9ca3af;">（${escapeHtml(g.note)}）</span>`
+                : `<span class="note-tag">📝 ${escapeHtml(g.note)}</span>`)
+            : `<span></span>`;
+          const btnHtml = g.checkedIn
+            ? `<button type="button" class="btn-checkin do-out" data-action="toggle" data-id="${escapeHtml(g.id)}">↩ 取消簽到</button>`
+            : `<button type="button" class="btn-checkin do-in" data-action="toggle" data-id="${escapeHtml(g.id)}">✓ 立即簽到</button>`;
+
+          return `
+            <article class="${cardCls}">
+              <div>
+                <div class="guest-top">
+                  <div>
+                    <span class="guest-cat">${escapeHtml(g.category)}</span>
+                    <h3 class="guest-name">${escapeHtml(g.name)}</h3>
+                    <p class="guest-title">${escapeHtml(g.title || '貴賓')}</p>
+                  </div>
+                  ${badge}
+                </div>
+              </div>
+              <div class="guest-meta">
+                ${noteHtml}
+              </div>
+              <div class="guest-actions">
+                ${btnHtml}
+                <button type="button" class="btn-note" data-action="note" data-id="${escapeHtml(g.id)}">👥 代理/備註</button>
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      function renderAll() {
+        renderStats();
+        renderCategoryTabs();
+        renderGuests();
+      }
+
+      async function toggleCheckin(id) {
+        const g = state.guests.find((x) => x.id === id);
+        if (!g) return;
+        const prevChecked = g.checkedIn;
+        const prevTime = g.checkinTime;
+        const targetStatus = !prevChecked;
+        const d = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+
+        // 樂觀更新：點擊立即反應，且維持原本名單排序位置
+        g.checkedIn = targetStatus;
+        g.checkinTime = targetStatus ? `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` : '';
+        renderAll();
+
+        try {
+          const res = await TP72Checkin.postAction({
+            action: 'checkin',
+            id: id,
+            checkedIn: targetStatus
+          });
+          state.guests = res.data.guests;
+          renderAll();
+          showToast(targetStatus ? `✅ ${g.name} 已完成簽到` : `已取消 ${g.name} 簽到狀態`);
+        } catch (err) {
+          g.checkedIn = prevChecked;
+          g.checkinTime = prevTime;
+          renderAll();
+          showToast('操作失敗：' + err.message);
+        }
+      }
+
+      function openNoteModal(id) {
+        const g = state.guests.find((x) => x.id === id);
+        if (!g) return;
+        state.editingNoteId = id;
+        el.noteModalTitle.textContent = `${g.name}（${g.title || '貴賓'}）— 出席身分／備註`;
+        el.noteInput.value = g.note === '可填代理' || g.note === '可填助理' ? '' : (g.note || '');
+        el.noteModal.classList.add('open');
+        el.noteInput.focus();
+      }
+
+      // 事件綁定
+      el.searchInput.addEventListener('input', (e) => {
+        state.search = e.target.value;
+        el.searchClear.style.display = state.search ? 'block' : 'none';
+        renderGuests();
+      });
+
+      el.searchClear.addEventListener('click', () => {
+        state.search = '';
+        el.searchInput.value = '';
+        el.searchClear.style.display = 'none';
+        renderGuests();
+      });
+
+      document.querySelectorAll('.status-pill').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.status-pill').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.statusFilter = btn.dataset.status;
+          renderGuests();
+        });
+      });
+
+      el.categoryTabs.addEventListener('click', (e) => {
+        const btn = e.target.closest('.cat-tab');
+        if (!btn) return;
+        state.activeCategory = btn.dataset.cat;
+        renderCategoryTabs();
+        renderGuests();
+      });
+
+      el.guestGrid.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const id = btn.dataset.id;
+        if (btn.dataset.action === 'toggle') {
+          toggleCheckin(id);
+        } else if (btn.dataset.action === 'note') {
+          openNoteModal(id);
+        }
+      });
+
+      // 備註 Modal
+      document.querySelectorAll('.chip-btn').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          el.noteInput.value = chip.dataset.chip;
+        });
+      });
+
+      document.getElementById('btnNoteCancel').addEventListener('click', () => {
+        el.noteModal.classList.remove('open');
+      });
+
+      document.getElementById('btnNoteSaveAndCheckin').addEventListener('click', async () => {
+        if (!state.editingNoteId) return;
+        const g = state.guests.find((x) => x.id === state.editingNoteId);
+        try {
+          const res = await TP72Checkin.postAction({
+            action: 'checkin',
+            id: state.editingNoteId,
+            checkedIn: true,
+            note: el.noteInput.value.trim()
+          });
+          state.guests = res.data.guests;
+          el.noteModal.classList.remove('open');
+          renderAll();
+          showToast(`✅ ${g ? g.name : ''} 已儲存備註並完成簽到`);
+        } catch (err) {
+          showToast('儲存失敗：' + err.message);
+        }
+      });
+
+      // 新增現場貴賓 Modal
+      document.getElementById('btnOpenAdd').addEventListener('click', () => {
+        el.addCategory.innerHTML = state.categories.map((c) => {
+          const sel = c === '現場臨時來賓' ? 'selected' : '';
+          return `<option value="${escapeHtml(c)}" ${sel}>${escapeHtml(c)}</option>`;
+        }).join('');
+        el.addName.value = '';
+        el.addTitle.value = '';
+        el.addNote.value = '';
+        el.addAutoCheckin.checked = true;
+        el.addModal.classList.add('open');
+        el.addName.focus();
+      });
+
+      document.getElementById('btnAddCancel').addEventListener('click', () => {
+        el.addModal.classList.remove('open');
+      });
+
+      document.getElementById('btnAddSubmit').addEventListener('click', async () => {
+        const name = el.addName.value.trim();
+        if (!name) {
+          showToast('請輸入貴賓姓名');
+          el.addName.focus();
+          return;
+        }
+        try {
+          const res = await TP72Checkin.postAction({
+            action: 'addGuest',
+            name: name,
+            title: el.addTitle.value.trim(),
+            category: el.addCategory.value,
+            note: el.addNote.value.trim(),
+            checkedIn: el.addAutoCheckin.checked
+          });
+          state.guests = res.data.guests;
+          el.addModal.classList.remove('open');
+          renderAll();
+          showToast(`✅ 已新增貴賓：${name}`);
+        } catch (err) {
+          showToast('新增失敗：' + err.message);
+        }
+      });
+
+      // 連線設定 Modal
+      document.getElementById('btnSettings').addEventListener('click', () => {
+        el.gasUrlInput.value = TP72Checkin.getGasUrl();
+        el.settingsModal.classList.add('open');
+      });
+
+      document.getElementById('btnSettingsCancel').addEventListener('click', () => {
+        el.settingsModal.classList.remove('open');
+      });
+
+      document.getElementById('btnSettingsSave').addEventListener('click', () => {
+        TP72Checkin.setGasUrl(el.gasUrlInput.value);
+        el.settingsModal.classList.remove('open');
+        loadData(true);
+      });
+
+      document.getElementById('btnResetDemo').addEventListener('click', () => {
+        TP72Checkin.resetLocalDemo();
+        el.settingsModal.classList.remove('open');
+        loadData(false);
+        showToast('已重設本機測試名單（41 筆）');
+      });
+
+      document.getElementById('btnResetAllStatus').addEventListener('click', async () => {
+        if (!confirm('確定要將所有貴賓的「簽到狀態」與「簽到時間」全部歸零嗎？')) return;
+        try {
+          const res = await TP72Checkin.postAction({ action: 'resetAllStatus' });
+          state.guests = res.data.guests;
+          el.settingsModal.classList.remove('open');
+          renderAll();
+          showToast('🔄 已重置所有簽到狀態');
+        } catch (err) {
+          showToast('重置失敗：' + err.message);
+        }
+      });
+
+      document.getElementById('btnRefresh').addEventListener('click', () => {
+        loadData(true);
+      });
+
+      // 初始載入 + 每 8 秒靜默同步
+      loadData(false, true);
+      setInterval(() => {
+        if (state.mode === 'cloud') loadData(false, true);
+      }, 8000);
+    })();
+  </script>
+</body>
+</html>

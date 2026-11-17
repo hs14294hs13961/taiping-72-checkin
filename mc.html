@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>太平國小 72 週年校慶 — 司儀即時貴賓看板</title>
+  <link rel="icon" type="image/png" href="./太平國小_校徽.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fdf8f3;
+      color: #1f2937;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #7f1d1d 0%, #b91c1c 65%, #991b1b 100%);
+      color: #fff;
+      padding: 14px 20px;
+      border-bottom: 4px solid #f59e0b;
+      box-shadow: 0 4px 14px rgba(127, 29, 29, 0.18);
+    }
+    .header-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand img {
+      width: 56px;
+      height: 56px;
+      background: #fff;
+      border-radius: 50%;
+      padding: 3px;
+      object-fit: contain;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 900;
+    }
+    .brand p {
+      margin: 2px 0 0;
+      font-size: 0.88rem;
+      color: #fde68a;
+      font-weight: 500;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .btn-toggle {
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.88rem;
+    }
+    .btn-toggle:hover { background: rgba(255, 255, 255, 0.26); }
+    .btn-back {
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: #f59e0b;
+      color: #451a03;
+      font-weight: 800;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 18px 16px 48px;
+    }
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding: 10px 16px;
+      background: #fff;
+      border: 1px solid #f3e8dd;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(127, 29, 29, 0.05);
+      font-weight: 700;
+      color: #7f1d1d;
+    }
+    .summary-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 0.88rem;
+    }
+    .btn-reset-order {
+      padding: 5px 12px;
+      border-radius: 8px;
+      border: 1px solid #fca5a5;
+      background: #fef2f2;
+      color: #991b1b;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.84rem;
+    }
+    .btn-reset-order:hover { background: #fee2e2; }
+    .group-block {
+      margin-bottom: 20px;
+    }
+    .group-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fef3c7;
+      border-left: 5px solid #b91c1c;
+      color: #7f1d1d;
+      padding: 8px 14px;
+      border-radius: 0 10px 10px 0;
+      font-size: 1.05rem;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+    /* 司儀看板：3 個一列，字體放大更清晰 */
+    .list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    @media (max-width: 960px) {
+      .list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 600px) {
+      .list { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: #ffffff;
+      border: 2px solid #86efac;
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: 0 2px 8px rgba(21, 128, 61, 0.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      cursor: grab;
+      transition: transform 0.12s, border-color 0.15s, box-shadow 0.15s;
+      user-select: none;
+    }
+    .card:active { cursor: grabbing; }
+    .card.dragging {
+      opacity: 0.45;
+      transform: scale(0.97);
+    }
+    .card.drag-over {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .order-tag {
+      background: #fef2f2;
+      color: #991b1b;
+      padding: 2px 7px;
+      border-radius: 5px;
+    }
+    .time-tag {
+      color: #15803d;
+      font-family: monospace;
+      font-size: 0.82rem;
+    }
+    .name {
+      font-size: 1.65rem;
+      font-weight: 900;
+      color: #111827;
+      line-height: 1.25;
+      margin-top: 4px;
+    }
+    .title {
+      font-size: 1.12rem;
+      color: #374151;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+    .note {
+      margin-top: 6px;
+      display: inline-block;
+      background: #fef3c7;
+      border: 2px solid #d97706;
+      color: #78350f;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 1.22rem;
+      font-weight: 900;
+      line-height: 1.3;
+      align-self: flex-start;
+    }
+    .card-sort-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      padding-top: 6px;
+      border-top: 1px dashed #e5e7eb;
+    }
+    .drag-hint {
+      font-size: 0.74rem;
+      color: #9ca3af;
+      font-weight: 600;
+    }
+    .sort-btns {
+      display: flex;
+      gap: 4px;
+    }
+    .btn-move {
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      color: #374151;
+      border-radius: 6px;
+      padding: 2px 9px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-move:hover:not(:disabled) {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      color: #92400e;
+    }
+    .btn-move:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+    .empty {
+      text-align: center;
+      padding: 56px 16px;
+      color: #6b7280;
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: #fff;
+      border: 1px solid #f3e8dd;
+      border-radius: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <img src="./太平國小_校徽.png" alt="太平國小校徽" />
+        <div>
+          <h1>太平國小 72 週年校慶 — 司儀即時貴賓看板</h1>
+          <p>支援拖曳卡片或按 ◀ ▶ 自行調節唱名順序（每 5 秒自動同步已到場貴賓）</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <span id="syncInfo" class="pill">同步中...</span>
+        <button id="btnViewMode" type="button" class="btn-toggle">切換：依分類分組顯示</button>
+        <a href="./index.html" class="btn-back">← 返回簽到作業</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="summary">
+      <span id="countText">已報到貴賓：0 位</span>
+      <div class="summary-right">
+        <button id="btnResetOrder" type="button" class="btn-reset-order">↺ 還原原名單順序</button>
+        <span id="timeText"></span>
+      </div>
+    </div>
+    <section id="checkedContainer"></section>
+  </main>
+
+  <script src="./shared.js"></script>
+  <script>
+    (function () {
+      const ORDER_STORAGE_KEY = 'tp72_mc_custom_order';
+      const checkedContainer = document.getElementById('checkedContainer');
+      const countText = document.getElementById('countText');
+      const timeText = document.getElementById('timeText');
+      const syncInfo = document.getElementById('syncInfo');
+      const btnViewMode = document.getElementById('btnViewMode');
+      const btnResetOrder = document.getElementById('btnResetOrder');
+
+      let groupByCategory = false;
+      let latestData = { guests: [], categories: [] };
+      let dragSourceId = null;
+
+      function loadCustomOrder() {
+        try {
+          const raw = localStorage.getItem(ORDER_STORAGE_KEY);
+          const arr = JSON.parse(raw || '[]');
+          return Array.isArray(arr) ? arr : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function saveCustomOrder(orderIds) {
+        localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(orderIds));
+      }
+
+      function getOrderedCheckedGuests() {
+        const checked = latestData.guests.filter((g) => g.checkedIn);
+        const customOrder = loadCustomOrder();
+        if (customOrder.length === 0) {
+          return checked;
+        }
+        const rank = new Map();
+        customOrder.forEach((id, idx) => rank.set(id, idx));
+        const origRank = new Map();
+        latestData.guests.forEach((g, idx) => origRank.set(g.id, idx));
+
+        return [...checked].sort((a, b) => {
+          const ra = rank.has(a.id) ? rank.get(a.id) : 100000 + (origRank.get(a.id) || 0);
+          const rb = rank.has(b.id) ? rank.get(b.id) : 100000 + (origRank.get(b.id) || 0);
+          return ra - rb;
+        });
+      }
+
+      function ensureOrderIdsForCurrentList(orderedList) {
+        const ids = orderedList.map((g) => g.id);
+        saveCustomOrder(ids);
+        return ids;
+      }
+
+      function moveGuest(id, delta) {
+        const ordered = getOrderedCheckedGuests();
+        const ids = ensureOrderIdsForCurrentList(ordered);
+        const idx = ids.indexOf(id);
+        if (idx === -1) return;
+        const targetIdx = idx + delta;
+        if (targetIdx < 0 || targetIdx >= ids.length) return;
+        const temp = ids[idx];
+        ids[idx] = ids[targetIdx];
+        ids[targetIdx] = temp;
+        saveCustomOrder(ids);
+        render();
+      }
+
+      function reorderByDrop(sourceId, targetId) {
+        if (!sourceId || !targetId || sourceId === targetId) return;
+        const ordered = getOrderedCheckedGuests();
+        const ids = ensureOrderIdsForCurrentList(ordered);
+        const fromIdx = ids.indexOf(sourceId);
+        const toIdx = ids.indexOf(targetId);
+        if (fromIdx === -1 || toIdx === -1) return;
+        const [moved] = ids.splice(fromIdx, 1);
+        ids.splice(toIdx, 0, moved);
+        saveCustomOrder(ids);
+        render();
+      }
+
+      btnViewMode.addEventListener('click', () => {
+        groupByCategory = !groupByCategory;
+        btnViewMode.textContent = groupByCategory ? '切換：依唱名順序全部顯示' : '切換：依分類分組顯示';
+        render();
+      });
+
+      btnResetOrder.addEventListener('click', () => {
+        localStorage.removeItem(ORDER_STORAGE_KEY);
+        render();
+      });
+
+      function esc(s) {
+        return String(s || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function renderCard(g, displayNum, totalLen) {
+        const cleanNote = (g.note === '可填代理' || g.note === '可填助理') ? '' : g.note;
+        return `
+          <article class="card" draggable="true" data-id="${esc(g.id)}">
+            <div>
+              <div class="card-top">
+                <span class="order-tag">#${displayNum} ${esc(g.category)}</span>
+                <span class="time-tag">✓ ${esc(g.checkinTime || '已簽到')}</span>
+              </div>
+              <div class="name">${esc(g.name)}</div>
+              <div class="title">${esc(g.title || '貴賓')}</div>
+              ${cleanNote ? `<div class="note">📝 ${esc(cleanNote)}</div>` : ''}
+            </div>
+            <div class="card-sort-bar">
+              <span class="drag-hint">⋮⋮ 可拖曳調序</span>
+              <div class="sort-btns">
+                <button type="button" class="btn-move" data-move="-1" data-id="${esc(g.id)}" ${displayNum === 1 ? 'disabled' : ''} title="往前移一位">◀</button>
+                <button type="button" class="btn-move" data-move="1" data-id="${esc(g.id)}" ${displayNum === totalLen ? 'disabled' : ''} title="往後移一位">▶</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function render() {
+        const ordered = getOrderedCheckedGuests();
+        countText.textContent = `已報到貴賓：${ordered.length} / ${latestData.guests.length} 位`;
+
+        if (ordered.length === 0) {
+          checkedContainer.innerHTML = `<div class="empty">目前尚無已簽到貴賓</div>`;
+          return;
+        }
+
+        const totalLen = ordered.length;
+        const orderMap = new Map();
+        ordered.forEach((g, idx) => orderMap.set(g.id, idx + 1));
+
+        if (!groupByCategory) {
+          checkedContainer.innerHTML = `<div class="list">${ordered.map((g, idx) => renderCard(g, idx + 1, totalLen)).join('')}</div>`;
+          return;
+        }
+
+        const cats = latestData.categories || [];
+        const grouped = {};
+        cats.forEach((c) => { grouped[c] = []; });
+        ordered.forEach((g) => {
+          if (!grouped[g.category]) grouped[g.category] = [];
+          grouped[g.category].push(g);
+        });
+
+        checkedContainer.innerHTML = Object.entries(grouped)
+          .filter(([, list]) => list.length > 0)
+          .map(([cat, list]) => `
+            <div class="group-block">
+              <div class="group-title">
+                <span>${esc(cat)}</span>
+                <span>${list.length} 位</span>
+              </div>
+              <div class="list">${list.map((g) => renderCard(g, orderMap.get(g.id), totalLen)).join('')}</div>
+            </div>
+          `).join('');
+      }
+
+      // 點擊 ◀ / ▶ 調整順序
+      checkedContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-move]');
+        if (!btn) return;
+        moveGuest(btn.dataset.id, Number(btn.dataset.move));
+      });
+
+      // 拖曳卡片調整順序
+      checkedContainer.addEventListener('dragstart', (e) => {
+        const card = e.target.closest('.card[data-id]');
+        if (!card) return;
+        dragSourceId = card.dataset.id;
+        card.classList.add('dragging');
+        if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
+      });
+
+      checkedContainer.addEventListener('dragend', () => {
+        dragSourceId = null;
+        checkedContainer.querySelectorAll('.card').forEach((c) => {
+          c.classList.remove('dragging', 'drag-over');
+        });
+      });
+
+      checkedContainer.addEventListener('dragover', (e) => {
+        const card = e.target.closest('.card[data-id]');
+        if (!card || card.dataset.id === dragSourceId) return;
+        e.preventDefault();
+        checkedContainer.querySelectorAll('.card.drag-over').forEach((c) => c.classList.remove('drag-over'));
+        card.classList.add('drag-over');
+      });
+
+      checkedContainer.addEventListener('drop', (e) => {
+        const card = e.target.closest('.card[data-id]');
+        if (!card) return;
+        e.preventDefault();
+        reorderByDrop(dragSourceId, card.dataset.id);
+      });
+
+      async function refresh() {
+        try {
+          const res = await TP72Checkin.fetchGuests(false);
+          latestData = res;
+          syncInfo.textContent = res.mode === 'cloud' ? '🟢 雲端即時同步中' : '🟡 本機模式';
+          timeText.textContent = `最後更新：${new Date().toLocaleTimeString('zh-TW', { hour12: false })}`;
+          // 若正在拖曳中，暫緩重繪以免中斷拖曳手勢
+          if (!dragSourceId) render();
+        } catch (err) {
+          syncInfo.textContent = '⚠️ 同步異常';
+        }
+      }
+
+      refresh();
+      setInterval(refresh, 5000);
+    })();
+  </script>
+</body>
+</html>
